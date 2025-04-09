@@ -6,6 +6,7 @@
   <title>Prisoner's Dilemma</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    /* (Das Design bleibt gleich wie vorher, nur mit Anpassung der Buttons und Regeln) */
     body {
       margin: 0;
       padding: 0;
@@ -81,16 +82,38 @@
       color: #3f8cff;
     }
 
-    @media (max-width: 600px) {
-      .buttons {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      button {
-        width: 100%;
-      }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      color: white;
+      font-size: 1.2rem;
+      padding: 2rem;
+      text-align: center;
     }
+
+    .overlay button {
+      margin-top: 1rem;
+      padding: 1rem 2rem;
+      background-color: #3f8cff;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .overlay button:hover {
+      background-color: #317bb5;
+    }
+
   </style>
 </head>
 <body>
@@ -109,17 +132,38 @@
   </div>
 
   <div class="buttons">
-    <button onclick="playRound('cooperate')">🤝 Cooperate</button>
-    <button onclick="playRound('defect')">💣 Defect</button>
+    <button onclick="playRound('cooperate')" id="cooperateBtn" disabled>🤝 Cooperate</button>
+    <button onclick="playRound('defect')" id="defectBtn" disabled>💣 Defect</button>
   </div>
 
   <div class="log" id="log"></div>
+
+  <div class="overlay" id="overlay">
+    <div>
+      <p><strong>Rules for the Prisoner's Dilemma:</strong></p>
+      <p>Each player chooses to either cooperate or defect. Your decisions impact both your score and your opponent's score. If you both cooperate, you both win. If one defects while the other cooperates, the defector wins. If you both defect, both lose.</p>
+      <button onclick="startGame()">I Agree, Start the Game</button>
+    </div>
+  </div>
 
   <script>
     let round = 1;
     let playerScore = 0;
     let botScore = 0;
     let lastPlayerChoice = "cooperate";
+    let gameData = {
+      gameDate: new Date().toLocaleString(),
+      rounds: [],
+      cooperationRate: 0,
+      usedColor: "#3f8cff"
+    };
+
+    // Overlay and Game Start
+    function startGame() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('cooperateBtn').disabled = false;
+      document.getElementById('defectBtn').disabled = false;
+    }
 
     function playRound(playerChoice) {
       if (round > 10) return;
@@ -128,6 +172,7 @@
       let pPoints = 0;
       let bPoints = 0;
 
+      // Scoring logic
       if (playerChoice === 'cooperate' && botChoice === 'cooperate') {
         pPoints = 3;
         bPoints = 3;
@@ -145,6 +190,7 @@
       playerScore += pPoints;
       botScore += bPoints;
 
+      // Update UI
       document.getElementById("playerScore").textContent = playerScore;
       document.getElementById("botScore").textContent = botScore;
 
@@ -155,9 +201,27 @@
       round++;
       document.getElementById("round").textContent = round > 10 ? "Game Over" : round;
 
+      // Track round data
+      gameData.rounds.push({ round, playerChoice, botChoice, pPoints, bPoints });
+
       if (round > 10) {
-        document.querySelector(".buttons").innerHTML = "<h2 style='color:#3f8cff;'>Game Over</h2>";
+        calculateResults();
       }
+    }
+
+    function calculateResults() {
+      // Calculate Cooperation Rate
+      let cooperationCount = gameData.rounds.filter(round => round.playerChoice === 'cooperate').length;
+      gameData.cooperationRate = (cooperationCount / gameData.rounds.length) * 100;
+
+      // Create and download JSON file
+      const dataStr = JSON.stringify(gameData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prisoners_dilemma_${new Date().toLocaleString()}.json`;
+      a.click();
     }
   </script>
 </body>
