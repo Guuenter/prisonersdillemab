@@ -3,224 +3,150 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Prisoner's Dilemma</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <title>Prisoner's Dilemma Game</title>
   <style>
-    /* (Das Design bleibt gleich wie vorher, nur mit Anpassung der Buttons und Regeln) */
     body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f0ff;
+      color: #000;
       margin: 0;
       padding: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to right, #001933, #002b4d, #003366);
-      color: #f1f1f1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
     }
-
-    h1 {
-      color: #3f8cff;
-      margin-bottom: 0.5rem;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 0;
-      margin-bottom: 2rem;
-      font-size: 0.95rem;
-      color: #d0d0d0;
-    }
-
-    .scoreboard {
-      background: #1a1a1a;
-      padding: 1rem 2rem;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #3f8cff80;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    button {
-      background: transparent;
-      border: 2px solid #3f8cff;
-      color: #3f8cff;
-      font-size: 1.1rem;
-      font-weight: 600;
-      padding: 0.75rem 2rem;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    button:hover {
-      background: #3f8cff;
-      color: #000;
-      transform: scale(1.05);
-      box-shadow: 0 0 12px #3f8cff90;
-    }
-
-    .log {
-      background: #121212;
-      border-left: 4px solid #3f8cff;
-      padding: 1rem;
-      width: 100%;
+    .container {
       max-width: 700px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px #00000050 inset;
-      font-size: 0.95rem;
-    }
-
-    .log strong {
-      color: #3f8cff;
-    }
-
-    .overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-      color: white;
-      font-size: 1.2rem;
-      padding: 2rem;
+      margin: 0 auto;
+      padding: 20px;
       text-align: center;
     }
-
-    .overlay button {
-      margin-top: 1rem;
-      padding: 1rem 2rem;
-      background-color: #3f8cff;
-      border: none;
-      color: white;
-      font-size: 1rem;
-      border-radius: 5px;
+    .btn {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 18px;
       cursor: pointer;
+      border: none;
+      border-radius: 10px;
     }
-
-    .overlay button:hover {
-      background-color: #317bb5;
-    }
-
+    .cooperate { background-color: #3399ff; color: white; }
+    .betray { background-color: #003366; color: white; }
+    #startSection, #gameSection, #resultSection { display: none; }
   </style>
 </head>
 <body>
-  <h1>Prisoner's Dilemma</h1>
-  <ul>
-    <li><strong>Both Cooperate</strong>: 3 points each</li>
-    <li><strong>You Defect, Bot Cooperates</strong>: 5 for you, 0 for bot</li>
-    <li><strong>You Cooperate, Bot Defects</strong>: 0 for you, 5 for bot</li>
-    <li><strong>Both Defect</strong>: 1 point each</li>
-  </ul>
+  <div class="container">
+    <div id="startSection">
+      <h1>Prisoner's Dilemma</h1>
+      <p>
+        Welcome to the Prisoner’s Dilemma – a psychological strategy game.  
+        You and a bot will each decide in 10 rounds whether to <strong>cooperate</strong> or <strong>betray</strong>.  
+        Your goal is <strong>not to win</strong>, but to score as many points as possible.
+      </p>
+      <p>
+        <strong>Points system:</strong><br>
+        – Both cooperate: <strong>3 points each</strong><br>
+        – You cooperate, bot betrays: <strong>You get 0, bot gets 5</strong><br>
+        – You betray, bot cooperates: <strong>You get 5, bot gets 0</strong><br>
+        – Both betray: <strong>1 point each</strong>
+      </p>
+      <p>Click below to begin. Choose wisely.</p>
+      <button class="btn cooperate" onclick="startGame()">I understand. Start game</button>
+    </div>
 
-  <div class="scoreboard">
-    <p><strong>Round:</strong> <span id="round">1</span> / 10</p>
-    <p><strong>Your Score:</strong> <span id="playerScore">0</span></p>
-    <p><strong>Bot Score:</strong> <span id="botScore">0</span></p>
-  </div>
+    <div id="gameSection">
+      <h2>Round <span id="roundNumber">1</span>/10</h2>
+      <p>Choose your action:</p>
+      <button class="btn cooperate" onclick="playRound('cooperate')">Cooperate</button>
+      <button class="btn betray" onclick="playRound('betray')">Betray</button>
+      <p id="roundResult"></p>
+    </div>
 
-  <div class="buttons">
-    <button onclick="playRound('cooperate')" id="cooperateBtn" disabled>🤝 Cooperate</button>
-    <button onclick="playRound('defect')" id="defectBtn" disabled>💣 Defect</button>
-  </div>
-
-  <div class="log" id="log"></div>
-
-  <div class="overlay" id="overlay">
-    <div>
-      <p><strong>Rules for the Prisoner's Dilemma:</strong></p>
-      <p>Each player chooses to either cooperate or defect. Your decisions impact both your score and your opponent's score. If you both cooperate, you both win. If one defects while the other cooperates, the defector wins. If you both defect, both lose.</p>
-      <button onclick="startGame()">I Agree, Start the Game</button>
+    <div id="resultSection">
+      <h2>Game Over</h2>
+      <p id="finalResult"></p>
+      <button class="btn cooperate" onclick="downloadLog()">Download Game Report</button>
     </div>
   </div>
 
   <script>
-    let round = 1;
+    const totalRounds = 10;
+    let currentRound = 1;
     let playerScore = 0;
-    let botScore = 0;
-    let lastPlayerChoice = "cooperate";
-    let gameData = {
-      gameDate: new Date().toLocaleString(),
-      rounds: [],
-      cooperationRate: 0,
-      usedColor: "#3f8cff"
-    };
+    let playerCooperations = 0;
+    const colorCode = "#3399ff";
+    const colorName = "Blue";
+    let log = [];
 
-    // Overlay and Game Start
+    document.getElementById("startSection").style.display = "block";
+
     function startGame() {
-      document.getElementById('overlay').style.display = 'none';
-      document.getElementById('cooperateBtn').disabled = false;
-      document.getElementById('defectBtn').disabled = false;
+      document.getElementById("startSection").style.display = "none";
+      document.getElementById("gameSection").style.display = "block";
     }
 
-    function playRound(playerChoice) {
-      if (round > 10) return;
+    function playRound(playerMove) {
+      const botMove = Math.random() < 0.5 ? 'cooperate' : 'betray';
+      let roundPoints = 0;
 
-      const botChoice = lastPlayerChoice; // Tit-for-Tat
-      let pPoints = 0;
-      let bPoints = 0;
+      if (playerMove === 'cooperate' && botMove === 'cooperate') {
+        roundPoints = 3;
+        playerScore += 3;
+        playerCooperations++;
+      } else if (playerMove === 'cooperate' && botMove === 'betray') {
+        roundPoints = 0;
+        playerCooperations++;
+      } else if (playerMove === 'betray' && botMove === 'cooperate') {
+        roundPoints = 5;
+        playerScore += 5;
+      } else if (playerMove === 'betray' && botMove === 'betray') {
+        roundPoints = 1;
+        playerScore += 1;
+      }
 
-      // Scoring logic
-      if (playerChoice === 'cooperate' && botChoice === 'cooperate') {
-        pPoints = 3;
-        bPoints = 3;
-      } else if (playerChoice === 'defect' && botChoice === 'cooperate') {
-        pPoints = 5;
-        bPoints = 0;
-      } else if (playerChoice === 'cooperate' && botChoice === 'defect') {
-        pPoints = 0;
-        bPoints = 5;
+      log.push({
+        round: currentRound,
+        player: playerMove,
+        bot: botMove,
+        playerPoints: roundPoints
+      });
+
+      document.getElementById("roundResult").textContent = 
+        `You chose "${playerMove}", bot chose "${botMove}". You earned ${roundPoints} point(s).`;
+
+      currentRound++;
+
+      if (currentRound > totalRounds) {
+        endGame();
       } else {
-        pPoints = 1;
-        bPoints = 1;
-      }
-
-      playerScore += pPoints;
-      botScore += bPoints;
-
-      // Update UI
-      document.getElementById("playerScore").textContent = playerScore;
-      document.getElementById("botScore").textContent = botScore;
-
-      const logEntry = `Round ${round}: You chose <strong>${playerChoice}</strong>, Bot chose <strong>${botChoice}</strong> → You +${pPoints}, Bot +${bPoints}<br>`;
-      document.getElementById("log").innerHTML += logEntry;
-
-      lastPlayerChoice = playerChoice;
-      round++;
-      document.getElementById("round").textContent = round > 10 ? "Game Over" : round;
-
-      // Track round data
-      gameData.rounds.push({ round, playerChoice, botChoice, pPoints, bPoints });
-
-      if (round > 10) {
-        calculateResults();
+        document.getElementById("roundNumber").textContent = currentRound;
       }
     }
 
-    function calculateResults() {
-      // Calculate Cooperation Rate
-      let cooperationCount = gameData.rounds.filter(round => round.playerChoice === 'cooperate').length;
-      gameData.cooperationRate = (cooperationCount / gameData.rounds.length) * 100;
+    function endGame() {
+      document.getElementById("gameSection").style.display = "none";
+      document.getElementById("resultSection").style.display = "block";
 
-      // Create and download JSON file
-      const dataStr = JSON.stringify(gameData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `prisoners_dilemma_${new Date().toLocaleString()}.json`;
+      const cooperationRate = (playerCooperations / totalRounds * 100).toFixed(2);
+      const summary = `You finished the game with ${playerScore} total points and cooperated ${playerCooperations} times (${cooperationRate}%).`;
+      document.getElementById("finalResult").textContent = summary;
+    }
+
+    function downloadLog() {
+      const timestamp = new Date().toISOString();
+      const cooperationRate = (playerCooperations / totalRounds * 100).toFixed(2);
+
+      const result = {
+        timestamp,
+        colorHex: colorCode,
+        colorName: colorName,
+        totalPoints: playerScore,
+        cooperations: playerCooperations,
+        cooperationRate: `${cooperationRate}%`,
+        rounds: log
+      };
+
+      const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `prisoners_dilemma_${timestamp.replace(/[:.]/g, '-')}.json`;
       a.click();
     }
   </script>
