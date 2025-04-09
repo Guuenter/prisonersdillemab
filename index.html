@@ -1,205 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prisoner's Dilemma</title>
+  <title>Prisoner's Dilemma Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      margin-top: 40px;
-    }
-    .title {
-      text-align: center;
-      color: #1a1a1a;
-    }
-    .instructions {
-      background-color: #e6f2ff;
-      border-left: 6px solid #3399ff;
-      padding: 15px;
-      margin-bottom: 30px;
-      border-radius: 8px;
-    }
-    .scoreboard {
-      display: flex;
-      justify-content: space-between;
-      margin: 20px 0;
-      font-weight: bold;
-    }
-    .buttons {
+      padding: 0;
+      background-color: #0d1b2a;
+      color: #ffffff;
       display: flex;
       justify-content: center;
-      gap: 20px;
-      margin-bottom: 20px;
+      align-items: center;
+      height: 100vh;
     }
+
+    #intro, #game, #summaryModal {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      background: #1b263b;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+      max-width: 600px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      color: #4da6ff;
+    }
+
+    p {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+
     button {
-      padding: 12px 24px;
+      margin: 10px;
+      padding: 12px 20px;
       font-size: 16px;
       border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .cooperate {
-      background-color: #3399ff;
-      color: white;
-    }
-    .cooperate:hover {
-      background-color: #287acc;
-    }
-    .betray {
-      background-color: #ff4d4d;
-      color: white;
-    }
-    .betray:hover {
-      background-color: #cc0000;
-    }
-    .log {
-      background: #f1f1f1;
-      padding: 10px;
-      border-radius: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    #resultsModal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background-color: white;
-      padding: 30px;
       border-radius: 10px;
-      max-width: 500px;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-blue {
+      background-color: #1e90ff;
+      color: white;
+    }
+
+    .btn-blue:hover {
+      background-color: #1c7ed6;
+    }
+
+    .console {
+      background-color: #0a192f;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      height: 150px;
+      width: 100%;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    #summaryModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1b263b;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+      display: none;
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <h1 class="title">Prisoner's Dilemma Game</h1>
-    <div class="instructions">
-      <p><strong>Instructions:</strong> You will play 10 rounds of the classic Prisoner's Dilemma game against a computer bot. In each round, choose to either <strong>Cooperate</strong> or <strong>Betray</strong>.</p>
-      <ul>
-        <li>If both players cooperate: <strong>+3 points each</strong></li>
-        <li>If you cooperate and the bot betrays: <strong>You get 0, bot gets 5</strong></li>
-        <li>If you betray and the bot cooperates: <strong>You get 5, bot gets 0</strong></li>
-        <li>If both betray: <strong>1 point each</strong></li>
-      </ul>
-      <p><strong>Goal:</strong> Your objective is to accumulate as many points as possible. This is not about winning — it's about maximizing your score.</p>
-      <button onclick="startGame()">I understand. Start the game!</button>
-    </div>
-    <div id="gameArea" style="display:none">
-      <div class="scoreboard">
-        <div>Your Score: <span id="playerScore">0</span></div>
-        <div>Round: <span id="round">1</span>/10</div>
-      </div>
-      <div class="buttons">
-        <button class="cooperate" onclick="playRound('cooperate')">Cooperate</button>
-        <button class="betray" onclick="playRound('betray')">Betray</button>
-      </div>
-      <div class="log" id="log"></div>
-    </div>
+  <div id="intro">
+    <h1>Welcome to the Prisoner's Dilemma Game</h1>
+    <p>You will play 10 rounds against a bot.</p>
+    <p>Each round, choose to Cooperate or Betray.</p>
+    <p><strong>Points System:</strong></p>
+    <ul style="text-align: left">
+      <li>Both Cooperate: 3 points each</li>
+      <li>You Cooperate, Bot Betrays: You get 0, Bot gets 5</li>
+      <li>You Betray, Bot Cooperates: You get 5, Bot gets 0</li>
+      <li>Both Betray: 1 point each</li>
+    </ul>
+    <p>The goal is not to beat the bot, but to get as many points as possible.</p>
+    <button class="btn-blue" onclick="startGame()">I Understand, Start Game</button>
   </div>
 
-  <div id="resultsModal">
-    <div class="modal-content">
-      <h2>Game Over</h2>
-      <p id="summaryText"></p>
-      <p>📁 Your report has been downloaded automatically.</p>
+  <div id="game">
+    <h1>Prisoner's Dilemma</h1>
+    <div>
+      <button class="btn-blue" onclick="playerChoice('cooperate')">Cooperate</button>
+      <button class="btn-blue" onclick="playerChoice('betray')">Betray</button>
     </div>
+    <div class="console" id="log"></div>
+  </div>
+
+  <div id="summaryModal">
+    <h2>Game Over</h2>
+    <p id="summaryText"></p>
   </div>
 
   <script>
-    const POINTS = {
-      cooperate: { cooperate: [3, 3], betray: [0, 5] },
-      betray: { cooperate: [5, 0], betray: [1, 1] }
+    const rules = {
+      'cooperate-cooperate': [3, 3],
+      'cooperate-betray': [0, 5],
+      'betray-cooperate': [5, 0],
+      'betray-betray': [1, 1]
     };
-    const totalRounds = 10;
-    let currentRound = 1;
+
+    let round = 0;
+    let log = [];
     let playerScore = 0;
-    let coopCount = 0;
-    let gameLog = [];
-    const colorHex = '#3399ff';
-    const colorName = 'Blue';
+    let botScore = 0;
+    let cooperations = 0;
+    let color = '#1e90ff';
 
     function startGame() {
-      document.querySelector('.instructions').style.display = 'none';
-      document.getElementById('gameArea').style.display = 'block';
+      document.getElementById('intro').style.display = 'none';
+      document.getElementById('game').style.display = 'flex';
     }
 
-    function getBotChoice() {
-      return Math.random() < 0.5 ? 'cooperate' : 'betray';
-    }
+    function playerChoice(choice) {
+      if (round >= 10) return;
 
-    function playRound(playerChoice) {
-      const botChoice = getBotChoice();
-      const [playerPts, botPts] = POINTS[playerChoice][botChoice];
-      playerScore += playerPts;
-      if (playerChoice === 'cooperate') coopCount++;
+      const botChoice = Math.random() < 0.5 ? 'cooperate' : 'betray';
+      const result = rules[`${choice}-${botChoice}`];
 
-      gameLog.push({
-        round: currentRound,
-        playerChoice,
-        botChoice,
-        playerPts
-      });
+      playerScore += result[0];
+      botScore += result[1];
+      if (choice === 'cooperate') cooperations++;
 
-      const logEl = document.getElementById('log');
-      logEl.innerHTML += `<p>Round ${currentRound}: You chose <strong>${playerChoice}</strong>, Bot chose <strong>${botChoice}</strong> → +${playerPts} points</p>`;
+      const roundLog = `Round ${round + 1}: You ${choice}, Bot ${botChoice}. +${result[0]} points.`;
+      document.getElementById('log').innerHTML += roundLog + '<br>';
+      log.push({ round: round + 1, player: choice, bot: botChoice, points: result[0] });
+      round++;
 
-      currentRound++;
-      document.getElementById('round').textContent = Math.min(currentRound, totalRounds);
-      document.getElementById('playerScore').textContent = playerScore;
-
-      if (currentRound > totalRounds) {
-        showResults();
+      if (round === 10) {
+        endGame();
       }
     }
 
-    function showResults() {
-      const timestamp = new Date().toISOString();
-      const coopRate = Math.round((coopCount / totalRounds) * 100);
-      const report = {
-        timestamp,
-        colorHex,
-        colorName,
-        totalPoints: playerScore,
-        cooperations: coopCount,
-        cooperationRate: coopRate + '%',
-        rounds: gameLog
-      };
+    function endGame() {
+      const percent = ((cooperations / 10) * 100).toFixed(2);
+      const timestamp = new Date().toLocaleString();
 
-      const json = JSON.stringify(report, null, 2);
-      const blob = new Blob([json], { type: 'application/json' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `prisoners_dilemma_${timestamp.replace(/:/g, '-')}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      document.getElementById('summaryText').innerHTML = `You scored <strong>${playerScore}</strong> points.<br>
+      Cooperation Rate: ${percent}%<br>
+      Cooperations: ${cooperations}/10`;
+      document.getElementById('summaryModal').style.display = 'flex';
 
-      document.getElementById('resultsModal').style.display = 'flex';
-      document.getElementById('summaryText').textContent = `You scored ${playerScore} points with a cooperation rate of ${coopRate}%.`;
+      const data = [[
+        'Timestamp', 'Cooperation Rate (%)', 'Cooperations', 'Total Points', 'Color (Hex)', 'Color (Name)'
+      ], [
+        timestamp, percent, cooperations, playerScore, color, 'Blue'
+      ]];
+
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Summary');
+
+      XLSX.writeFile(wb, `Prisoners_Dilemma_${timestamp.replace(/\//g, '-').replace(/:/g, '-')}.xlsx`);
     }
+
+    window.onload = () => {
+      document.getElementById('intro').style.display = 'flex';
+    };
   </script>
 </body>
+
 </html>
