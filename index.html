@@ -138,10 +138,7 @@
     let playerScore = 0;
     let botScore = 0;
     const history = [];
-
-    // WSLS memory
-    let lastBotChoice = 'cooperate';
-    let lastBotPoints = 3;
+    let lastPlayerChoice = 'cooperate'; // Tit-for-Tat Startverhalten
 
     function startGame() {
       document.getElementById("overlay").style.display = "none";
@@ -150,8 +147,7 @@
     function playRound(playerChoice) {
       if (round > 10) return;
 
-      // Win-Stay, Lose-Shift
-      let botChoice = lastBotPoints >= 3 ? lastBotChoice : (lastBotChoice === 'cooperate' ? 'defect' : 'cooperate');
+      let botChoice = lastPlayerChoice;
 
       let pPoints = 0, bPoints = 0;
 
@@ -165,13 +161,11 @@
         pPoints = 1; bPoints = 1;
       }
 
-      // Update state
       playerScore += pPoints;
       botScore += bPoints;
       history.push({ round, playerChoice, botChoice, pPoints, bPoints });
 
-      lastBotChoice = botChoice;
-      lastBotPoints = bPoints;
+      lastPlayerChoice = playerChoice;
 
       document.getElementById("playerScore").innerText = playerScore;
       document.getElementById("botScore").innerText = botScore;
