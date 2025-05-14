@@ -138,6 +138,7 @@
     let playerScore = 0;
     let botScore = 0;
     const history = [];
+    let lastPlayerChoice = 'cooperate'; // Tit-for-Tat Startverhalten
 
     function startGame() {
       document.getElementById("overlay").style.display = "none";
@@ -146,7 +147,8 @@
     function playRound(playerChoice) {
       if (round > 10) return;
 
-      const botChoice = Math.random() < 0.5 ? 'cooperate' : 'defect';
+      let botChoice = lastPlayerChoice;
+
       let pPoints = 0, bPoints = 0;
 
       if (playerChoice === 'cooperate' && botChoice === 'cooperate') {
@@ -162,6 +164,8 @@
       playerScore += pPoints;
       botScore += bPoints;
       history.push({ round, playerChoice, botChoice, pPoints, bPoints });
+
+      lastPlayerChoice = playerChoice;
 
       document.getElementById("playerScore").innerText = playerScore;
       document.getElementById("botScore").innerText = botScore;
@@ -243,3 +247,4 @@
   </script>
 </body>
 </html>
+
