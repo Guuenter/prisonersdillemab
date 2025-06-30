@@ -138,7 +138,7 @@
     let playerScore = 0;
     let botScore = 0;
     const history = [];
-    let lastPlayerChoice = 'cooperate'; // Tit-for-Tat Startverhalten
+    let lastPlayerChoice = 'cooperate';
 
     function startGame() {
       document.getElementById("overlay").style.display = "none";
@@ -148,7 +148,6 @@
       if (round > 10) return;
 
       let botChoice = lastPlayerChoice;
-
       let pPoints = 0, bPoints = 0;
 
       if (playerChoice === 'cooperate' && botChoice === 'cooperate') {
@@ -157,7 +156,7 @@
         pPoints = 0; bPoints = 5;
       } else if (playerChoice === 'defect' && botChoice === 'cooperate') {
         pPoints = 5; bPoints = 0;
-      } else if (playerChoice === 'defect' && botChoice === 'defect') {
+      } else {
         pPoints = 1; bPoints = 1;
       }
 
@@ -179,33 +178,13 @@
 
     function exportGameLogXLSX() {
       const now = new Date();
-      const dateStr = now.toLocaleDateString();
-      const timeStr = now.toLocaleTimeString();
-      const datetime = `${dateStr} ${timeStr}`;
-
+      const datetime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
       const playerChoices = history.map(h => h.playerChoice === "cooperate" ? 1 : 0);
-      const filledChoices = [...playerChoices];
-      while (filledChoices.length < 10) filledChoices.push("");
+      while (playerChoices.length < 10) playerChoices.push("");
 
-      const coopCount = playerChoices.filter(c => c === 1).length;
-      const coopRate = ((coopCount / 10) * 100).toFixed(1);
-
-      const colorCode = "#3b6bff";
-      const colorName = "Blau";
-
-      const header = ["Datum & Uhrzeit"];
-      for (let i = 1; i <= 10; i++) header.push(`Runde ${i}`);
-      header.push("Spieler Punkte", "Bot Punkte", "Kooperationsrate (%)", "Farbe (Code)", "Farbe (Wort)");
-
-      const row = [
-        datetime,
-        ...filledChoices,
-        playerScore,
-        botScore,
-        coopRate,
-        colorCode,
-        colorName
-      ];
+      const coopRate = ((playerChoices.filter(c => c === 1).length / 10) * 100).toFixed(1);
+      const header = ["Datum & Uhrzeit", ...Array.from({ length: 10 }, (_, i) => `Runde ${i + 1}`), "Spieler Punkte", "Bot Punkte", "Kooperationsrate (%)", "Farbe (Code)", "Farbe (Wort)"];
+      const row = [datetime, ...playerChoices, playerScore, botScore, coopRate, "#3b6bff", "Blau"];
 
       const worksheet = XLSX.utils.aoa_to_sheet([header, row]);
       const workbook = XLSX.utils.book_new();
@@ -217,17 +196,19 @@
 
     function showEndScreen() {
       const endScreen = document.createElement("div");
-      endScreen.style.position = "fixed";
-      endScreen.style.top = "0";
-      endScreen.style.left = "0";
-      endScreen.style.width = "100vw";
-      endScreen.style.height = "100vh";
-      endScreen.style.background = "rgba(0,0,10,0.95)";
-      endScreen.style.zIndex = "2000";
-      endScreen.style.display = "flex";
-      endScreen.style.justifyContent = "center";
-      endScreen.style.alignItems = "center";
-      endScreen.style.padding = "2rem";
+      Object.assign(endScreen.style, {
+        position: "fixed",
+        top: "0",
+        left: "0",
+        width: "100vw",
+        height: "100vh",
+        background: "rgba(0,0,10,0.95)",
+        zIndex: "2000",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "2rem"
+      });
       endScreen.innerHTML = `
         <div style="max-width: 600px; background: #1a1a1a; border: 2px solid #0033ff; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 0 20px #0033ff80; font-family: 'Poppins', sans-serif;">
           <h2 style="color: #0033ff; margin-bottom: 1.5rem;">Game Over</h2>
