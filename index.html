@@ -139,9 +139,11 @@
     let botScore = 0;
     const history = [];
     let lastPlayerChoice = 'cooperate';
+    let gameStarted = false;
 
     function startGame() {
       document.getElementById("overlay").style.display = "none";
+      gameStarted = true;
     }
 
     function playRound(playerChoice) {
@@ -219,6 +221,7 @@
     }
 
     function wrappedPlayRound(choice) {
+      if (!gameStarted || round > 10) return;
       playRound(choice);
       if (round > 10) {
         exportGameLogXLSX();
