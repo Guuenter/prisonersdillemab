@@ -46,6 +46,14 @@
       display: flex;
       gap: 2rem;
       margin-bottom: 2rem;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .buttons.visible {
+      visibility: visible;
+      opacity: 1;
     }
 
     button {
@@ -126,7 +134,7 @@
     <p><strong>Bot Score:</strong> <span id="botScore">0</span></p>
   </div>
 
-  <div class="buttons">
+  <div class="buttons" id="actionButtons">
     <button onclick="wrappedPlayRound('cooperate')">🤝 Cooperate</button>
     <button onclick="wrappedPlayRound('defect')">💣 Defect</button>
   </div>
@@ -144,12 +152,25 @@
     function startGame() {
       document.getElementById("overlay").style.display = "none";
       gameStarted = true;
+      setTimeout(showButtons, 8000); // Start delay before first round
+    }
+
+    function showButtons() {
+      const buttons = document.getElementById("actionButtons");
+      buttons.classList.add("visible");
+    }
+
+    function hideButtons() {
+      const buttons = document.getElementById("actionButtons");
+      buttons.classList.remove("visible");
     }
 
     function playRound(playerChoice) {
       if (round > 10) return;
 
-      let botChoice = lastPlayerChoice;
+      hideButtons();
+
+      const botChoice = lastPlayerChoice;
       let pPoints = 0, bPoints = 0;
 
       if (playerChoice === 'cooperate' && botChoice === 'cooperate') {
@@ -165,7 +186,6 @@
       playerScore += pPoints;
       botScore += bPoints;
       history.push({ round, playerChoice, botChoice, pPoints, bPoints });
-
       lastPlayerChoice = playerChoice;
 
       document.getElementById("playerScore").innerText = playerScore;
@@ -176,6 +196,18 @@
       document.getElementById("log").innerHTML = logEntry + document.getElementById("log").innerHTML;
 
       round++;
+
+      if (round > 10) {
+        exportGameLogXLSX();
+        showEndScreen();
+      } else {
+        setTimeout(showButtons, 8000);
+      }
+    }
+
+    function wrappedPlayRound(choice) {
+      if (!gameStarted || round > 10) return;
+      playRound(choice);
     }
 
     function exportGameLogXLSX() {
@@ -218,15 +250,6 @@
         </div>
       `;
       document.body.appendChild(endScreen);
-    }
-
-    function wrappedPlayRound(choice) {
-      if (!gameStarted || round > 10) return;
-      playRound(choice);
-      if (round > 10) {
-        exportGameLogXLSX();
-        showEndScreen();
-      }
     }
   </script>
 </body>
